@@ -15,7 +15,7 @@ from PIL import Image, ImageTk
 ## Learn country flag
 ## Youtube :  https://youtube.com/c/softwareNuggets
 
-regions = ['Africa', 'Asia', 'Caribbean', 'Europe', 'North America', 'Oceania', 'South America', 'World']
+regions = ['Africa', 'Asia', 'Caribbean', 'Europe', 'North America', 'Oceania', 'South America', 'World Countries', 'World Islands']
 flag_dir = 'country_flags'
 
 
@@ -24,7 +24,7 @@ class GuessrApp:
         self.root = root
         self.root.title('Flag to country. A guessr game')
         self.root.geometry('800x700')
-        self.root.configure(bg='LightBlue')
+        self.root.configure(bg='lavender')
         self.root.resizable(False, False)
 
         self.data = data
@@ -107,7 +107,7 @@ class GuessrApp:
             return [str(10), str(max_value)]
 
         # Base series for values greater than or equal to 20
-        base_series = [10, 20, 30]
+        base_series = [10, 20, 30, 50, 100]
 
         if max_value <= base_series[-1]:
             # Create a series with values up to max_value
@@ -117,7 +117,7 @@ class GuessrApp:
             series = base_series + [max_value]
 
         # Ensure the series contains no more than four elements
-        while len(series) > 4:
+        while len(series) > 5:
             series.pop(0)
 
         return [str(num) for num in series]
@@ -147,7 +147,7 @@ class GuessrApp:
         self.num_answers_menu.grid(row=1, column=2, pady=5, sticky='w', padx=15)
 
         self.num_questions_var = tk.StringVar(value="10")
-        self.num_of_questions = tk.OptionMenu(input_frame, self.num_questions_var, "10", "20", "30")
+        self.num_of_questions = tk.OptionMenu(input_frame, self.num_questions_var, "10", "20", "30", "50", "100")
         self.num_of_questions.grid(row=1, column=3, pady=5, sticky='w', padx=15)
 
         self.start_button = tk.Button(input_frame, text="Start Quiz", command=self.start_quiz)
@@ -270,7 +270,7 @@ class GuessrApp:
         # Determine which button is the correct one
 
         if 0 <= self.correct_answer < self.num_answers:
-            correct_button = [self.button1, self.button2, self.button3, self.button4][self.correct_answer]
+            correct_button = [self.button1, self.button2, self.button3, self.button4, self.button5, self.button6][self.correct_answer]
         else:
             print(f"Invalid correct_answer index: {self.correct_answer}")
             return
@@ -283,7 +283,7 @@ class GuessrApp:
             self.score += 1
         else:
             # Color the selected wrong answer light pink
-            [self.button1, self.button2, self.button3, self.button4][selected_option].config(bg='light pink')
+            [self.button1, self.button2, self.button3, self.button4, self.button5, self.button6][selected_option].config(bg='light pink')
 
         # Update the score board
         self.update_score_board()
