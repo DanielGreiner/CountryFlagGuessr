@@ -7,7 +7,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from PIL import Image, ImageTk
 
-regions = ['Africa', 'Asia', 'Caribbean', 'Europe', 'North America', 'Oceania', 'South America'] #, 'World']
+regions = ['Africa', 'Asia', 'Caribbean', 'Europe', 'North America', 'Oceania', 'South America', 'World']
 flag_dir = 'country_flags'
 
 
@@ -252,6 +252,44 @@ class GuessrApp:
         self.button4.grid_forget()
         self.button5.grid_forget()
         self.button6.grid_forget()
+
+    def check_answer(self, selected_option):
+        # First, reset all button colors to the default color
+        self.button1.config(bg='SystemButtonFace')
+        self.button2.config(bg='SystemButtonFace')
+        self.button3.config(bg='SystemButtonFace')
+        self.button4.config(bg='SystemButtonFace')
+        self.button5.config(bg='SystemButtonFace')
+        self.button6.config(bg='SystemButtonFace')
+
+        # Determine which button is the correct one
+
+        if 0 <= self.correct_answer < self.num_answers:
+            correct_button = [self.button1, self.button2, self.button3, self.button4][self.correct_answer]
+        else:
+            print(f"Invalid correct_answer index: {self.correct_answer}")
+            return
+
+        # Color the correct button green
+        correct_button.config(bg='green')
+
+        # Check if the selected button is correct or not
+        if selected_option == self.correct_answer:
+            self.score += 1
+        else:
+            # Color the selected wrong answer light pink
+            [self.button1, self.button2, self.button3, self.button4][selected_option].config(bg='light pink')
+
+        # Update the score board
+        self.update_score_board()
+
+        # Wait for 1 second and then ask the next question
+        self.root.after(2000, self.reset_button_colors)
+
+        # next question
+        count = self.num_questions_var.get()
+        self.root.after(2000, self.ask_questions, int(count))
+
 
     def ask_questions(self, num_questions):
         if self.current_question >= num_questions or self.current_question >= len(self.flags):
