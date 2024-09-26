@@ -7,6 +7,14 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from PIL import Image, ImageTk
 
+## This file is contains slight alteration from the original flag guessing game by @SoftwareNuggets:
+## For more of his work, visit his GitHub page at: https://github.com/softwareNuggets
+
+## written by Scott Johnson | @SoftwareNuggets
+## Date written: Sep 10, 2024
+## Learn country flag
+## Youtube :  https://youtube.com/c/softwareNuggets
+
 regions = ['Africa', 'Asia', 'Caribbean', 'Europe', 'North America', 'Oceania', 'South America', 'World']
 flag_dir = 'country_flags'
 
@@ -15,7 +23,7 @@ class GuessrApp:
     def __init__(self, root, data=None):
         self.root = root
         self.root.title('Flag to country. A guessr game')
-        self.root.geometry('800x800')
+        self.root.geometry('800x700')
         self.root.configure(bg='LightBlue')
         self.root.resizable(False, False)
 
@@ -35,9 +43,6 @@ class GuessrApp:
         self.button6 = tk.Button(self.root, text='Button 4', width=40, command=lambda: self.check_answer(5))
         self.flag_label = tk.Label(self.root)
 
-        # Initialize score label outside of challenge start to avoid overwriting
-        self.score_label = tk.Label(self.root, text="Questions: 0 | Correct: 0 | Percentage: 0%")
-        self.score_label.grid(row=5, column=0, columnspan=5, pady=10)
 
         # Hide all buttons initially
         self.hide_buttons()
@@ -54,7 +59,7 @@ class GuessrApp:
 
         # Initialize score label outside of challenge start to avoid overwriting
         self.score_label = tk.Label(self.root, text="Questions: 0 | Correct: 0 | Percentage: 0%")
-        self.score_label.grid(row=5, column=0, columnspan=5, pady=10)
+        self.score_label.grid(row=6, column=0, columnspan=5, pady=10)
 
         # Hide all buttons initially
         self.hide_buttons()
@@ -126,30 +131,30 @@ class GuessrApp:
         self.root.grid_columnconfigure(0, weight=1)
 
         self.region = tk.StringVar()
-        ttk.Label(input_frame, text="Region").grid(row=0, column=0, padx=15)
-        ttk.Label(input_frame, text="Select number of answers:").grid(row=0, column=2, padx=0)
-        ttk.Label(input_frame, text="# of Questions:").grid(row=0, column=5, padx=20)
+        ttk.Label(input_frame, text="Region").grid(row=0, column=0, padx=15, sticky='w')
+        ttk.Label(input_frame, text="Select number of answers:").grid(row=0, column=2, padx=15)
+        ttk.Label(input_frame, text="# of Questions:").grid(row=0, column=3, padx=15)
 
         # Create and place the combo box using grid layout
         self.region_combo = ttk.Combobox(input_frame, textvariable=self.region, state="readonly")
-        self.region_combo.grid(row=1, column=0, pady=5, padx=15)
+        self.region_combo.grid(row=1, column=0, pady=5, padx=15, sticky='w')
         self.region_combo['values'] = regions
         self.region_combo.bind("<<ComboboxSelected>>", self.load_num_of_questions)
         self.region_combo.set("Select a Region")
 
         self.num_answers_var = tk.StringVar(value="4")
         self.num_answers_menu = tk.OptionMenu(input_frame, self.num_answers_var, "2", "4", "6")
-        self.num_answers_menu.grid(row=1, column=2, pady=5, sticky='s')
+        self.num_answers_menu.grid(row=1, column=2, pady=5, sticky='w', padx=15)
 
         self.num_questions_var = tk.StringVar(value="10")
         self.num_of_questions = tk.OptionMenu(input_frame, self.num_questions_var, "10", "20", "30")
-        self.num_of_questions.grid(row=1, column=5, padx=0, sticky='s')
+        self.num_of_questions.grid(row=1, column=3, pady=5, sticky='w', padx=15)
 
         self.start_button = tk.Button(input_frame, text="Start Quiz", command=self.start_quiz)
-        self.start_button.grid(row=2, column=1, pady=10, sticky='w')
+        self.start_button.grid(row=2, column=0, pady=10, sticky='w', padx=15)
 
         self.reset_button = tk.Button(input_frame, text="Reset", command=self.reset_quiz)
-        self.reset_button.grid(row=2, column=2, pady=10, sticky='w')
+        self.reset_button.grid(row=2, column=0, pady=10, sticky='w', padx=90)
 
     def start_quiz(self):
         selected_region = self.region_combo.get()
@@ -319,9 +324,9 @@ class GuessrApp:
 
         # Load and display the flag image
         image = Image.open(flag_path)
-        image = image.resize((660, 412), Image.LANCZOS)  # Resize image
+        image = image.resize((620, 387), Image.LANCZOS)  # Resize image, org: (660, 412)
         self.flag_image = ImageTk.PhotoImage(image)
-        self.flag_label.config(image=self.flag_image, width=660, height=412)
+        self.flag_label.config(image=self.flag_image, width=620, height=387)    # org: (660, 412)
         self.flag_label.grid(row=2, column=0, columnspan=5, padx=10, pady=10, sticky='n')
 
         self.button1.config(text=option_list[0] if len(option_list) > 0 else "")
