@@ -15,14 +15,14 @@ class GuessrApp:
     def __init__(self, root, data=None):
         self.root = root
         self.root.title('Flag to country. A guessr game')
-        self.root.geometry('800x700')
+        self.root.geometry('800x800')
         self.root.configure(bg='LightBlue')
         self.root.resizable(False, False)
 
         self.data = data
         self.score = 0
         self.total_questions = 0
-        self.current_questions = 0
+        self.current_question = 0
         self.num_answers = 4
         self.countries_dict = {}
         self.correct_answer = None
@@ -161,6 +161,7 @@ class GuessrApp:
 
         # get questionf for selected region, data is already randomized
         num_questions = int(self.num_questions_var.get())
+
         self.get_countries_by_region(selected_region, num_questions)
 
         self.current_question = 0
@@ -193,7 +194,6 @@ class GuessrApp:
                 needed = needed - 1
                 if needed == 0:
                     break
-
         else:
             # Return an empty dictionary if the region does not exist
             return {}
@@ -290,7 +290,6 @@ class GuessrApp:
         count = self.num_questions_var.get()
         self.root.after(2000, self.ask_questions, int(count))
 
-
     def ask_questions(self, num_questions):
         if self.current_question >= num_questions or self.current_question >= len(self.flags):
             self.show_final_score()
@@ -300,7 +299,6 @@ class GuessrApp:
 
         ## display question number on screen
         self.current_question += 1
-
         flag_code, flag_path = self.flags[self.current_question - 1]
         correct_country = self.countries_dict[flag_code]
 
