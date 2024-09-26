@@ -5,8 +5,7 @@ import random
 import sys
 import tkinter as tk
 from tkinter import messagebox, ttk
-
-#from PIL import Image, ImageTk
+from PIL import Image, ImageTk
 
 regions = ['Africa', 'Asia', 'Caribbean', 'Europe', 'North America', 'Oceania', 'South America'] #, 'World']
 flag_dir = 'country_flags'
@@ -29,9 +28,11 @@ class GuessrApp:
         self.correct_answer = None
 
         self.button1 = tk.Button(self.root, text='Button 1', width=40, command=lambda: self.check_answer(0))
-        self.button1 = tk.Button(self.root, text='Button 2', width=40, command=lambda: self.check_answer(1))
-        self.button1 = tk.Button(self.root, text='Button 3', width=40, command=lambda: self.check_answer(2))
-        self.button1 = tk.Button(self.root, text='Button 4', width=40, command=lambda: self.check_answer(3))
+        self.button2 = tk.Button(self.root, text='Button 2', width=40, command=lambda: self.check_answer(1))
+        self.button3 = tk.Button(self.root, text='Button 3', width=40, command=lambda: self.check_answer(2))
+        self.button4 = tk.Button(self.root, text='Button 4', width=40, command=lambda: self.check_answer(3))
+        self.button5 = tk.Button(self.root, text='Button 4', width=40, command=lambda: self.check_answer(4))
+        self.button6 = tk.Button(self.root, text='Button 4', width=40, command=lambda: self.check_answer(5))
         self.flag_label = tk.Label(self.root)
 
         # Initialize score label outside of challenge start to avoid overwriting
@@ -137,7 +138,7 @@ class GuessrApp:
         self.region_combo.set("Select a Region")
 
         self.num_answers_var = tk.StringVar(value="4")
-        self.num_answers_menu = tk.OptionMenu(input_frame, self.num_answers_var, "2", "4", "6", "8")
+        self.num_answers_menu = tk.OptionMenu(input_frame, self.num_answers_var, "2", "4", "6")
         self.num_answers_menu.grid(row=1, column=2, pady=5, sticky='s')
 
         self.num_questions_var = tk.StringVar(value="10")
@@ -217,12 +218,123 @@ class GuessrApp:
 
         self.total_flags = len(self.flags)
 
+    def start_new_challenge(self):
+        self.show_buttons()
+        self.update_score_board()
+
+    def show_buttons(self):
+        self.hide_buttons()  # Hide all buttons before showing specific ones
+
+        if self.num_answers == 2:
+            self.button1.grid(row=3, column=1, padx=60, pady=5, sticky='we')
+            self.button2.grid(row=3, column=2, padx=60, pady=5, sticky='we')
+        elif self.num_answers == 4:
+            self.button1.grid(row=3, column=0, padx=60, pady=5, sticky='we')
+            self.button2.grid(row=3, column=1, padx=60, pady=5, sticky='we')
+            self.button3.grid(row=4, column=0, padx=60, pady=5, sticky='we')
+            self.button4.grid(row=4, column=1, padx=60, pady=5, sticky='we')
+        elif self.num_answers == 6:
+            self.button1.grid(row=3, column=0, padx=60, pady=5, sticky='we')
+            self.button2.grid(row=3, column=1, padx=60, pady=5, sticky='we')
+            self.button3.grid(row=4, column=0, padx=60, pady=5, sticky='we')
+            self.button4.grid(row=4, column=1, padx=60, pady=5, sticky='we')
+            self.button5.grid(row=5, column=0, padx=60, pady=5, sticky='we')
+            self.button6.grid(row=5, column=1, padx=60, pady=5, sticky='we')
+
+    def load_countries(self, event):
+        num_question = int(self.num_questions_var.get())
+        self.get_countries_by_region(selected_region, num_question)
+
     def hide_buttons(self):
         self.button1.grid_forget()
         self.button2.grid_forget()
         self.button3.grid_forget()
         self.button4.grid_forget()
+        self.button5.grid_forget()
+        self.button6.grid_forget()
 
+    def ask_questions(self, num_questions):
+        if self.current_question >= num_questions or self.current_question >= len(self.flags):
+            self.show_final_score()
+            return
+
+        option_list = []
+
+        ## display question number on screen
+        self.current_question += 1
+
+        flag_code, flag_path = self.flags[self.current_question - 1]
+        correct_country = self.countries_dict[flag_code]
+
+        country_list = list(self.countries_dict.values())
+        country_list.remove(correct_country)
+        option_list.append(correct_country)
+
+        for i in range(self.num_answers - 1):
+            if not country_list:
+                break;
+            count = len(country_list)
+            index = random.randint(0, count - 1)
+            option_list.append(country_list[index])
+            country_list.remove(country_list[index])
+
+        random.shuffle(option_list)
+        self.correct_answer = option_list.index(correct_country)  # Set the index of the correct answer
+
+        # Load and display the flag image
+        image = Image.open(flag_path)
+        image = image.resize((660, 412), Image.LANCZOS)  # Resize image
+        self.flag_image = ImageTk.PhotoImage(image)
+        self.flag_label.config(image=self.flag_image, width=660, height=412)
+        self.flag_label.grid(row=2, column=0, columnspan=5, padx=10, pady=10, sticky='n')
+
+        self.button1.config(text=option_list[0] if len(option_list) > 0 else "")
+        self.button2.config(text=option_list[1] if len(option_list) > 1 else "")
+        self.button3.config(text=option_list[2] if len(option_list) > 2 else "")
+        self.button4.config(text=option_list[3] if len(option_list) > 3 else "")
+        self.button5.config(text=option_list[4] if len(option_list) > 4 else "")
+        self.button6.config(text=option_list[5] if len(option_list) > 5 else "")
+
+    def reset_quiz(self):
+        self.flag_label.config(image='')
+        num_questions_value = int(self.num_questions_var.get())
+        self.score = 0
+        self.current_question = 0
+        self.ask_questions(num_questions_value)  # Restart quiz with 10 questions
+        self.update_score_board()
+
+    def update_score_board(self):
+        num_questions_value = int(self.num_questions_var.get())
+        num_answers = int(self.num_answers_var.get())
+
+        percentage = (self.score / num_questions_value) * 100  # Assuming 10 questions
+        self.score_label.config(
+            text=f"Questions: {num_questions_value} | Correct: {self.score} | Percentage: {percentage:.2f}%")
+
+    def show_final_score(self):
+        num_questions_value = int(self.num_questions_var.get())
+        percentage = (self.score / num_questions_value) * 100
+        messagebox.showinfo("Quiz Completed",
+                            f"Final Score: {self.score}/{num_questions_value}\nPercentage: {percentage:.2f}%")
+        self.score_label.config(
+            text=f"Questions: {num_questions_value} | Correct: {self.score} | Percentage: {percentage:.2f}%")
+
+    def reset_button_colors(self):
+        # Reset all button colors
+        self.button1.config(bg='SystemButtonFace')
+        self.button2.config(bg='SystemButtonFace')
+        self.button3.config(bg='SystemButtonFace')
+        self.button4.config(bg='SystemButtonFace')
+        self.button5.config(bg='SystemButtonFace')
+        self.button6.config(bg='SystemButtonFace')
+
+    def update_score_board(self):
+        num_questions_value = int(self.num_questions_var.get())
+        num_answers = int(self.num_answers_var.get())
+
+        percentage = (self.score / num_questions_value) * 100  # Assuming 10 questions
+        self.score_label.config(
+            text=f"Questions: {num_questions_value} | Correct: {self.score} | Percentage: {percentage:.2f}%")
 
 if __name__ == "__main__":
     root = tk.Tk()
