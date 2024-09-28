@@ -44,10 +44,10 @@ class GuessrApp:
         self.button6 = tk.Button(self.root, text='Button 6', width=40, command=lambda: self.check_answer(5))
         self.buttonnext = tk.Button(self.root, text='Next', width=40,
                                     command=lambda: self.next_question())
-        self.buttontext = tk.Entry(self.root, width=40, font = "Calibri 11")
+        self.buttontext = tk.Entry(self.root, width=40, font="Calibri 11")
         self.buttontextcheck = tk.Button(self.root, text='Check', width=40,
                                          command=lambda: self.compare_text_string())
-        self.correcttext = tk.Text(self.root, width=40, height=1, font = "Calibri 11")
+        self.correcttext = tk.Text(self.root, width=40, height=1, font="Calibri 11")
 
 
 
@@ -191,10 +191,11 @@ class GuessrApp:
         # Check if a region is selected
         if selected_region == "Select a Region":
             messagebox.showerror("Error", "You must first select a Region")
+            self.reset_quiz()
             return
-
-        if selected_mode == "Select a Mode":
+        elif selected_mode == "Select a Mode":
             messagebox.showerror("Error", "You must first select a Mode")
+            self.reset_quiz()
             return
 
         # get questionf for selected region, data is already randomized
@@ -207,34 +208,41 @@ class GuessrApp:
         self.num_answers = int(self.num_answers_var.get())
         self.load_images()  # Load flag images
         self.start_new_challenge(selected_mode)
-        self.ask_questions(num_questions, selected_mode)
+        self.ask_questions(selected_mode)
 
     def next_question(self):
-        num_questions = int(self.num_questions_var.get())
+        self.update_score_board()
         selected_mode = self.mode_combo.get()
-        self.ask_questions(num_questions, selected_mode)
+        self.ask_questions(selected_mode)
 
     def compare_text_string(self):
         user_input = self.buttontext.get()
         correct_answer_string = self.correct_string
-        print(user_input)
+        self.reset_button_colors()
 
-        self.correcttext.config(bg='SystemButtonFace')
-        self.buttontext.config(bg='SystemButtonFace')
-
-        if user_input.lower() == correct_answer_string.lower():
-            self.score += 1
-            self.buttontext.config(bg='green')
-            self.correcttext.insert(tk.END, correct_answer_string)
-            self.buttontextcheck["state"] = "disabled"
-            self.correcttext.config(bg='green')
+        if user_input.lower() == '':
+            messagebox.showerror("Error", "You must first enter the name of a country")
+            return
         else:
-            self.buttontext.config(bg='red')
-            self.correcttext.insert(tk.END, correct_answer_string)
-            self.correcttext.config(bg='green')
-            self.buttontextcheck["state"] = "disabled"
+            if user_input.lower() == correct_answer_string.lower():
+                self.score += 1
+                self.buttontext.config(bg='green')
+                self.correcttext.delete('1.0', tk.END)
+                self.correcttext.insert(tk.END, correct_answer_string)
+                self.buttontextcheck["state"] = "disabled"
+                self.correcttext.config(bg='green')
+            else:
+                self.buttontext.config(bg='red')
+                self.correcttext.delete('1.0', tk.END)
+                self.correcttext.insert(tk.END, correct_answer_string)
+                self.correcttext.config(bg='green')
+                self.buttontextcheck["state"] = "disabled"
 
-        self.root.after(1000, self.nextnormal)
+        if self.current_question >= int(self.num_questions_var.get()) or self.current_question >= len(self.flags):
+            self.show_final_score()
+            return
+        else:
+            self.root.after(1000, self.nextnormal)
 
     def get_countries_by_region(self, region_name, needed):
 
@@ -339,12 +347,7 @@ class GuessrApp:
 
     def check_answer(self, selected_option):
         # First, reset all button colors to the default color
-        self.button1.config(bg='SystemButtonFace')
-        self.button2.config(bg='SystemButtonFace')
-        self.button3.config(bg='SystemButtonFace')
-        self.button4.config(bg='SystemButtonFace')
-        self.button5.config(bg='SystemButtonFace')
-        self.button6.config(bg='SystemButtonFace')
+        self.reset_button_colors()
 
         # Determine which button is the correct one
 
@@ -365,7 +368,6 @@ class GuessrApp:
             [self.button1, self.button2, self.button3, self.button4, self.button5, self.button6][selected_option].config(bg='light pink')
 
         # Update the score board
-        self.update_score_board()
 
         self.button1["state"] = "disabled"
         self.button2["state"] = "disabled"
@@ -375,17 +377,18 @@ class GuessrApp:
         self.button6["state"] = "disabled"
 
         # Wait for 1 second and then ask the next question
-        self.root.after(1000, self.nextnormal)
+
+        if self.current_question >= int(self.num_questions_var.get()) or self.current_question >= len(self.flags):
+            self.show_final_score()
+            return
+        else:
+            self.root.after(1000, self.nextnormal)
 
     def nextnormal(self):
         self.buttonnext["state"] = "normal"
 
-    def ask_questions(self, num_questions, mode):
+    def ask_questions(self, mode):
         self.buttonnext["state"] = "disabled"
-
-        if self.current_question >= num_questions or self.current_question >= len(self.flags):
-            self.show_final_score()
-            return
 
         option_list = []
 
@@ -415,7 +418,6 @@ class GuessrApp:
                 index = random.randint(0, count - 1)
                 option_list.append(country_list[index])
                 country_list.remove(country_list[index])
-            print(option_list)
             random.shuffle(option_list)
             self.correct_answer = option_list.index(correct_country)  # Set the index of the correct answer
 
@@ -434,6 +436,13 @@ class GuessrApp:
             self.button6["state"] = "normal"
 
             self.reset_button_colors()
+        if mode == "Text input":
+            self.reset_button_colors()
+            self.buttontextcheck["state"] = "normal"
+            self.buttontext.delete(0, 'end')
+            self.correcttext.delete('1.0', tk.END)
+            self.correcttext.insert(tk.END, "Correct Answer")
+
 
     def update_score_board(self):
         num_questions_value = int(self.num_questions_var.get())
@@ -441,7 +450,7 @@ class GuessrApp:
 
         percentage = (self.score / num_questions_value) * 100  # Assuming 10 questions
         self.score_label.config(
-            text=f"Questions: {num_questions_value} | Correct: {self.score} | Percentage: {percentage:.2f}%")
+            text=f"Questions: {num_questions_value} | Current Question: {self.current_question + 1} | Correct: {self.score} | Percentage: {percentage:.2f}%")
 
     def show_final_score(self):
         num_questions_value = int(self.num_questions_var.get())
@@ -459,6 +468,8 @@ class GuessrApp:
         self.button4.config(bg='SystemButtonFace')
         self.button5.config(bg='SystemButtonFace')
         self.button6.config(bg='SystemButtonFace')
+        self.correcttext.config(bg='SystemButtonFace')
+        self.buttontext.config(bg='SystemButtonFace')
 
     def reset_quiz(self):
         self.flag_label.config(image='')
@@ -466,19 +477,11 @@ class GuessrApp:
         self.current_question = 0
         self.update_score_board()
 
-        self.region_combo["state"] = "normal"
-        self.mode_combo["state"] = "normal"
+        self.region_combo["state"] = "readonly"
+        self.mode_combo["state"] = "readonly"
         self.num_of_questions["state"] = "normal"
         self.num_answers_menu["state"] = "normal"
         self.start_button["state"] = "normal"
-
-    def update_score_board(self):
-        num_questions_value = int(self.num_questions_var.get())
-        num_answers = int(self.num_answers_var.get())
-
-        percentage = (self.score / num_questions_value) * 100  # Assuming 10 questions
-        self.score_label.config(
-            text=f"Questions: {num_questions_value} | Correct: {self.score} | Percentage: {percentage:.2f}%")
 
 if __name__ == "__main__":
     root = tk.Tk()
