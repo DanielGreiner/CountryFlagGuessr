@@ -15,9 +15,11 @@ from PIL import Image, ImageTk
 ## Learn country flag
 ## Youtube :  https://youtube.com/c/softwareNuggets
 
-regions = ['Africa', 'Asia', 'Caribbean', 'Europe', 'North America', 'Oceania', 'South America', 'World Countries', 'World Islands']
+regions = ['Africa', 'Asia', 'Caribbean', 'Europe', 'North America', 'Oceania', 'South America', 'World Countries',
+           'World Islands']
 modes = ['Choices', 'Text input']
 flag_dir = 'country_flags'
+
 
 class GuessrApp:
     def __init__(self, root, data=None):
@@ -49,8 +51,6 @@ class GuessrApp:
                                          command=lambda: self.compare_text_string())
         self.correcttext = tk.Text(self.root, width=40, height=1, font="Calibri 11")
 
-
-
         self.flag_label = tk.Label(self.root)
 
         # Load country data
@@ -81,16 +81,12 @@ class GuessrApp:
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
-    def load_num_of_questions(self, event):
+    def load_num_of_questions(self):
         selected_region = self.region.get()
 
         region_data = copy.deepcopy(self.data[selected_region])
         max_entries = len(region_data)
         self.update_option_menu(max_entries)
-
-    def different_modes(self, event):
-        selected_mode = self.mode.get()
-
 
     def update_option_menu(self, max_value):
         # Generate the series based on max_value
@@ -147,8 +143,6 @@ class GuessrApp:
         ttk.Label(input_frame, text="# of Questions:").grid(row=0, column=2, padx=15)
         ttk.Label(input_frame, text="Select number of answers:").grid(row=0, column=3, padx=15)
 
-
-
         # Create and place the combo box using grid layout
         self.region_combo = ttk.Combobox(input_frame, textvariable=self.region, state="readonly")
         self.region_combo.grid(row=1, column=0, pady=5, padx=15, sticky='w')
@@ -160,7 +154,7 @@ class GuessrApp:
         self.mode_combo = ttk.Combobox(input_frame, textvariable=self.mode, state="readonly")
         self.mode_combo.grid(row=1, column=1, pady=5, padx=15, sticky='w')
         self.mode_combo['values'] = modes
-        self.mode_combo.bind("<<ComboboxSelected>>", self.different_modes)
+        self.mode_combo.bind("<<ComboboxSelected>>")
         self.mode_combo.set("Select a Mode")
 
         self.num_questions_var = tk.StringVar(value="10")
@@ -329,7 +323,8 @@ class GuessrApp:
             self.button6.grid(row=5, column=1, padx=60, pady=5, sticky='we')
             self.buttonnext.grid(row=6, column=0, columnspan=2, pady=10)
 
-    def load_countries(self, event):
+    def load_countries(self):
+        selected_region = self.region.get()
         num_question = int(self.num_questions_var.get())
         self.get_countries_by_region(selected_region, num_question)
 
@@ -352,7 +347,8 @@ class GuessrApp:
         # Determine which button is the correct one
 
         if 0 <= self.correct_answer < self.num_answers:
-            correct_button = [self.button1, self.button2, self.button3, self.button4, self.button5, self.button6][self.correct_answer]
+            correct_button = [self.button1, self.button2, self.button3, self.button4, self.button5,
+                              self.button6][self.correct_answer]
         else:
             print(f"Invalid correct_answer index: {self.correct_answer}")
             return
@@ -365,7 +361,8 @@ class GuessrApp:
             self.score += 1
         else:
             # Color the selected wrong answer light pink
-            [self.button1, self.button2, self.button3, self.button4, self.button5, self.button6][selected_option].config(bg='light pink')
+            [self.button1, self.button2, self.button3, self.button4, self.button5,
+             self.button6][selected_option].config(bg='light pink')
 
         # Update the score board
 
@@ -413,7 +410,7 @@ class GuessrApp:
         if mode == 'Choices':
             for i in range(self.num_answers - 1):
                 if not country_list:
-                    break;
+                    break
                 count = len(country_list)
                 index = random.randint(0, count - 1)
                 option_list.append(country_list[index])
@@ -443,14 +440,13 @@ class GuessrApp:
             self.correcttext.delete('1.0', tk.END)
             self.correcttext.insert(tk.END, "Correct Answer")
 
-
     def update_score_board(self):
         num_questions_value = int(self.num_questions_var.get())
-        num_answers = int(self.num_answers_var.get())
 
         percentage = (self.score / num_questions_value) * 100  # Assuming 10 questions
         self.score_label.config(
-            text=f"Questions: {num_questions_value} | Current Question: {self.current_question + 1} | Correct: {self.score} | Percentage: {percentage:.2f}%")
+            text=f"Questions: {num_questions_value} | Current Question: {self.current_question + 1} "
+                 f"| Correct: {self.score} | Percentage: {percentage:.2f}%")
 
     def show_final_score(self):
         num_questions_value = int(self.num_questions_var.get())
@@ -482,6 +478,7 @@ class GuessrApp:
         self.num_of_questions["state"] = "normal"
         self.num_answers_menu["state"] = "normal"
         self.start_button["state"] = "normal"
+
 
 if __name__ == "__main__":
     root = tk.Tk()
