@@ -16,8 +16,8 @@ from PIL import Image, ImageTk
 ## Youtube :  https://youtube.com/c/softwareNuggets
 
 regions = ['Africa', 'Asia', 'Caribbean', 'Europe', 'North America', 'Oceania', 'South America', 'World Countries', 'World Islands']
+modes = ['Choices', 'Text input']
 flag_dir = 'country_flags'
-
 
 class GuessrApp:
     def __init__(self, root, data=None):
@@ -34,6 +34,7 @@ class GuessrApp:
         self.num_answers = 4
         self.countries_dict = {}
         self.correct_answer = None
+        self.correct_string = None
 
         self.button1 = tk.Button(self.root, text='Button 1', width=40, command=lambda: self.check_answer(0))
         self.button2 = tk.Button(self.root, text='Button 2', width=40, command=lambda: self.check_answer(1))
@@ -41,7 +42,15 @@ class GuessrApp:
         self.button4 = tk.Button(self.root, text='Button 4', width=40, command=lambda: self.check_answer(3))
         self.button5 = tk.Button(self.root, text='Button 5', width=40, command=lambda: self.check_answer(4))
         self.button6 = tk.Button(self.root, text='Button 6', width=40, command=lambda: self.check_answer(5))
-        self.buttonnext = tk.Button(self.root, text='Next', width=40, command=lambda: self.ask_questions(num_questions=int(self.num_questions_var.get())))
+        self.buttonnext = tk.Button(self.root, text='Next', width=40,
+                                    command=lambda: self.next_question())
+        self.buttontext = tk.Entry(self.root, width=40, font = "Calibri 11")
+        self.buttontextcheck = tk.Button(self.root, text='Check', width=40,
+                                         command=lambda: self.compare_text_string())
+        self.correcttext = tk.Text(self.root, width=40, height=1, font = "Calibri 11")
+
+
+
         self.flag_label = tk.Label(self.root)
 
         # Load country data
@@ -78,6 +87,10 @@ class GuessrApp:
         region_data = copy.deepcopy(self.data[selected_region])
         max_entries = len(region_data)
         self.update_option_menu(max_entries)
+
+    def different_modes(self, event):
+        selected_mode = self.mode.get()
+
 
     def update_option_menu(self, max_value):
         # Generate the series based on max_value
@@ -128,9 +141,13 @@ class GuessrApp:
         self.root.grid_columnconfigure(0, weight=1)
 
         self.region = tk.StringVar()
+        self.mode = tk.StringVar()
         ttk.Label(input_frame, text="Region").grid(row=0, column=0, padx=15, sticky='w')
-        ttk.Label(input_frame, text="Select number of answers:").grid(row=0, column=2, padx=15)
-        ttk.Label(input_frame, text="# of Questions:").grid(row=0, column=3, padx=15)
+        ttk.Label(input_frame, text="Mode").grid(row=0, column=1, padx=15, sticky='w')
+        ttk.Label(input_frame, text="# of Questions:").grid(row=0, column=2, padx=15)
+        ttk.Label(input_frame, text="Select number of answers:").grid(row=0, column=3, padx=15)
+
+
 
         # Create and place the combo box using grid layout
         self.region_combo = ttk.Combobox(input_frame, textvariable=self.region, state="readonly")
@@ -139,26 +156,45 @@ class GuessrApp:
         self.region_combo.bind("<<ComboboxSelected>>", self.load_num_of_questions)
         self.region_combo.set("Select a Region")
 
-        self.num_answers_var = tk.StringVar(value="4")
-        self.num_answers_menu = tk.OptionMenu(input_frame, self.num_answers_var, "2", "4", "6")
-        self.num_answers_menu.grid(row=1, column=2, pady=5, sticky='w', padx=15)
+        # Create and place the combo box using grid layout
+        self.mode_combo = ttk.Combobox(input_frame, textvariable=self.mode, state="readonly")
+        self.mode_combo.grid(row=1, column=1, pady=5, padx=15, sticky='w')
+        self.mode_combo['values'] = modes
+        self.mode_combo.bind("<<ComboboxSelected>>", self.different_modes)
+        self.mode_combo.set("Select a Mode")
 
         self.num_questions_var = tk.StringVar(value="10")
         self.num_of_questions = tk.OptionMenu(input_frame, self.num_questions_var, "10", "20", "30", "50", "100")
-        self.num_of_questions.grid(row=1, column=3, pady=5, sticky='w', padx=15)
+        self.num_of_questions.grid(row=1, column=2, pady=5, sticky='w', padx=15)
+
+        self.num_answers_var = tk.StringVar(value="4")
+        self.num_answers_menu = tk.OptionMenu(input_frame, self.num_answers_var, "2", "4", "6")
+        self.num_answers_menu.grid(row=1, column=3, pady=5, sticky='w', padx=15)
 
         self.start_button = tk.Button(input_frame, text="Start Quiz", command=self.start_quiz)
         self.start_button.grid(row=2, column=0, pady=10, sticky='w', padx=15)
 
-        self.reset_button = tk.Button(input_frame, text="Reset", command=self.reset_quiz)
-        self.reset_button.grid(row=2, column=0, pady=10, sticky='w', padx=90)
+        self.reset_button = tk.Button(input_frame, text="Reset Quiz", command=self.reset_quiz)
+        self.reset_button.grid(row=2, column=1, pady=10, sticky='w', padx=15)
 
     def start_quiz(self):
+
+        self.region_combo["state"] = "disabled"
+        self.mode_combo["state"] = "disabled"
+        self.num_of_questions["state"] = "disabled"
+        self.num_answers_menu["state"] = "disabled"
+        self.start_button["state"] = "disabled"
+
         selected_region = self.region_combo.get()
+        selected_mode = self.mode_combo.get()
 
         # Check if a region is selected
         if selected_region == "Select a Region":
             messagebox.showerror("Error", "You must first select a Region")
+            return
+
+        if selected_mode == "Select a Mode":
+            messagebox.showerror("Error", "You must first select a Mode")
             return
 
         # get questionf for selected region, data is already randomized
@@ -170,8 +206,35 @@ class GuessrApp:
         self.score = 0
         self.num_answers = int(self.num_answers_var.get())
         self.load_images()  # Load flag images
-        self.start_new_challenge()
-        self.ask_questions(num_questions)
+        self.start_new_challenge(selected_mode)
+        self.ask_questions(num_questions, selected_mode)
+
+    def next_question(self):
+        num_questions = int(self.num_questions_var.get())
+        selected_mode = self.mode_combo.get()
+        self.ask_questions(num_questions, selected_mode)
+
+    def compare_text_string(self):
+        user_input = self.buttontext.get()
+        correct_answer_string = self.correct_string
+        print(user_input)
+
+        self.correcttext.config(bg='SystemButtonFace')
+        self.buttontext.config(bg='SystemButtonFace')
+
+        if user_input.lower() == correct_answer_string.lower():
+            self.score += 1
+            self.buttontext.config(bg='green')
+            self.correcttext.insert(tk.END, correct_answer_string)
+            self.buttontextcheck["state"] = "disabled"
+            self.correcttext.config(bg='green')
+        else:
+            self.buttontext.config(bg='red')
+            self.correcttext.insert(tk.END, correct_answer_string)
+            self.correcttext.config(bg='green')
+            self.buttontextcheck["state"] = "disabled"
+
+        self.root.after(1000, self.nextnormal)
 
     def get_countries_by_region(self, region_name, needed):
 
@@ -220,23 +283,35 @@ class GuessrApp:
 
         self.total_flags = len(self.flags)
 
-    def start_new_challenge(self):
-        self.show_buttons()
-        self.update_score_board()
+    def start_new_challenge(self, mode):
+        if mode == 'Choices':
+            self.show_buttons()
+            self.update_score_board()
+
+        if mode == 'Text input':
+            self.text_box()
+            self.update_score_board()
+
+    def text_box(self):
+        self.hide_buttons()
+        self.buttontext.grid(row=3, column=0, pady=10, padx=60, sticky='we')
+        self.correcttext.grid(row=3, column=1, pady=10, padx=60, sticky='we')
+        self.buttontextcheck.grid(row=4, column=0, pady=10, padx=60, sticky='we')
+        self.buttonnext.grid(row=4, column=1, pady=10, padx=60, sticky='we')
 
     def show_buttons(self):
         self.hide_buttons()  # Hide all buttons before showing specific ones
 
         if self.num_answers == 2:
-            self.button1.grid(row=3, column=1, padx=60, pady=5, sticky='we')
-            self.button2.grid(row=3, column=2, padx=60, pady=5, sticky='we')
-            self.buttonnext.grid(row=4, column = 0, columnspan = 2, pady = 10)
+            self.button1.grid(row=3, column=0, padx=60, pady=5, sticky='we')
+            self.button2.grid(row=3, column=1, padx=60, pady=5, sticky='we')
+            self.buttonnext.grid(row=4, column=0, columnspan=2, pady=10)
         elif self.num_answers == 4:
             self.button1.grid(row=3, column=0, padx=60, pady=5, sticky='we')
             self.button2.grid(row=3, column=1, padx=60, pady=5, sticky='we')
             self.button3.grid(row=4, column=0, padx=60, pady=5, sticky='we')
             self.button4.grid(row=4, column=1, padx=60, pady=5, sticky='we')
-            self.buttonnext.grid(row=5, column = 0, columnspan = 2, pady = 10)
+            self.buttonnext.grid(row=5, column=0, columnspan=2, pady=10)
         elif self.num_answers == 6:
             self.button1.grid(row=3, column=0, padx=60, pady=5, sticky='we')
             self.button2.grid(row=3, column=1, padx=60, pady=5, sticky='we')
@@ -244,9 +319,7 @@ class GuessrApp:
             self.button4.grid(row=4, column=1, padx=60, pady=5, sticky='we')
             self.button5.grid(row=5, column=0, padx=60, pady=5, sticky='we')
             self.button6.grid(row=5, column=1, padx=60, pady=5, sticky='we')
-            self.buttonnext.grid(row=6, column = 0, columnspan = 2, pady = 10)
-
-
+            self.buttonnext.grid(row=6, column=0, columnspan=2, pady=10)
 
     def load_countries(self, event):
         num_question = int(self.num_questions_var.get())
@@ -260,6 +333,9 @@ class GuessrApp:
         self.button5.grid_forget()
         self.button6.grid_forget()
         self.buttonnext.grid_forget()
+        self.buttontextcheck.grid_forget()
+        self.buttontext.grid_forget()
+        self.correcttext.grid_forget()
 
     def check_answer(self, selected_option):
         # First, reset all button colors to the default color
@@ -304,7 +380,7 @@ class GuessrApp:
     def nextnormal(self):
         self.buttonnext["state"] = "normal"
 
-    def ask_questions(self, num_questions):
+    def ask_questions(self, num_questions, mode):
         self.buttonnext["state"] = "disabled"
 
         if self.current_question >= num_questions or self.current_question >= len(self.flags):
@@ -316,54 +392,48 @@ class GuessrApp:
         ## display question number on screen
         self.current_question += 1
         flag_code, flag_path = self.flags[self.current_question - 1]
+        string_code, flag_path = self.flags[self.current_question - 1]
         correct_country = self.countries_dict[flag_code]
+        self.correct_string = correct_country
 
         country_list = list(self.countries_dict.values())
         country_list.remove(correct_country)
         option_list.append(correct_country)
 
-        for i in range(self.num_answers - 1):
-            if not country_list:
-                break;
-            count = len(country_list)
-            index = random.randint(0, count - 1)
-            option_list.append(country_list[index])
-            country_list.remove(country_list[index])
-
-        random.shuffle(option_list)
-        self.correct_answer = option_list.index(correct_country)  # Set the index of the correct answer
-
         # Load and display the flag image
         image = Image.open(flag_path)
         image = image.resize((620, 387), Image.LANCZOS)  # Resize image, org: (660, 412)
         self.flag_image = ImageTk.PhotoImage(image)
-        self.flag_label.config(image=self.flag_image, width=620, height=387)    # org: (660, 412)
+        self.flag_label.config(image=self.flag_image, width=620, height=387)  # org: (660, 412)
         self.flag_label.grid(row=2, column=0, columnspan=5, padx=10, pady=10, sticky='n')
 
-        self.button1.config(text=option_list[0] if len(option_list) > 0 else "")
-        self.button2.config(text=option_list[1] if len(option_list) > 1 else "")
-        self.button3.config(text=option_list[2] if len(option_list) > 2 else "")
-        self.button4.config(text=option_list[3] if len(option_list) > 3 else "")
-        self.button5.config(text=option_list[4] if len(option_list) > 4 else "")
-        self.button6.config(text=option_list[5] if len(option_list) > 5 else "")
+        if mode == 'Choices':
+            for i in range(self.num_answers - 1):
+                if not country_list:
+                    break;
+                count = len(country_list)
+                index = random.randint(0, count - 1)
+                option_list.append(country_list[index])
+                country_list.remove(country_list[index])
+            print(option_list)
+            random.shuffle(option_list)
+            self.correct_answer = option_list.index(correct_country)  # Set the index of the correct answer
 
-        self.button1["state"] = "normal"
-        self.button2["state"] = "normal"
-        self.button3["state"] = "normal"
-        self.button4["state"] = "normal"
-        self.button5["state"] = "normal"
-        self.button6["state"] = "normal"
+            self.button1.config(text=option_list[0] if len(option_list) > 0 else "")
+            self.button2.config(text=option_list[1] if len(option_list) > 1 else "")
+            self.button3.config(text=option_list[2] if len(option_list) > 2 else "")
+            self.button4.config(text=option_list[3] if len(option_list) > 3 else "")
+            self.button5.config(text=option_list[4] if len(option_list) > 4 else "")
+            self.button6.config(text=option_list[5] if len(option_list) > 5 else "")
 
-        self.reset_button_colors()
+            self.button1["state"] = "normal"
+            self.button2["state"] = "normal"
+            self.button3["state"] = "normal"
+            self.button4["state"] = "normal"
+            self.button5["state"] = "normal"
+            self.button6["state"] = "normal"
 
-
-    def reset_quiz(self):
-        self.flag_label.config(image='')
-        num_questions_value = int(self.num_questions_var.get())
-        self.score = 0
-        self.current_question = 0
-        self.ask_questions(num_questions_value)  # Restart quiz with 10 questions
-        self.update_score_board()
+            self.reset_button_colors()
 
     def update_score_board(self):
         num_questions_value = int(self.num_questions_var.get())
@@ -389,6 +459,18 @@ class GuessrApp:
         self.button4.config(bg='SystemButtonFace')
         self.button5.config(bg='SystemButtonFace')
         self.button6.config(bg='SystemButtonFace')
+
+    def reset_quiz(self):
+        self.flag_label.config(image='')
+        self.score = 0
+        self.current_question = 0
+        self.update_score_board()
+
+        self.region_combo["state"] = "normal"
+        self.mode_combo["state"] = "normal"
+        self.num_of_questions["state"] = "normal"
+        self.num_answers_menu["state"] = "normal"
+        self.start_button["state"] = "normal"
 
     def update_score_board(self):
         num_questions_value = int(self.num_questions_var.get())
