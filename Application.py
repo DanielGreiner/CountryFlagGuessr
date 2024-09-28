@@ -23,7 +23,7 @@ class GuessrApp:
     def __init__(self, root, data=None):
         self.root = root
         self.root.title('Flag to country. A guessr game')
-        self.root.geometry('800x700')
+        self.root.geometry('800x800')
         self.root.configure(bg='lavender')
         self.root.resizable(False, False)
 
@@ -39,13 +39,10 @@ class GuessrApp:
         self.button2 = tk.Button(self.root, text='Button 2', width=40, command=lambda: self.check_answer(1))
         self.button3 = tk.Button(self.root, text='Button 3', width=40, command=lambda: self.check_answer(2))
         self.button4 = tk.Button(self.root, text='Button 4', width=40, command=lambda: self.check_answer(3))
-        self.button5 = tk.Button(self.root, text='Button 4', width=40, command=lambda: self.check_answer(4))
-        self.button6 = tk.Button(self.root, text='Button 4', width=40, command=lambda: self.check_answer(5))
+        self.button5 = tk.Button(self.root, text='Button 5', width=40, command=lambda: self.check_answer(4))
+        self.button6 = tk.Button(self.root, text='Button 6', width=40, command=lambda: self.check_answer(5))
+        self.buttonnext = tk.Button(self.root, text='Next', width=40, command=lambda: self.ask_questions(num_questions=int(self.num_questions_var.get())))
         self.flag_label = tk.Label(self.root)
-
-
-        # Hide all buttons initially
-        self.hide_buttons()
 
         # Load country data
         self.file_path = 'AllCountries.json'
@@ -59,7 +56,7 @@ class GuessrApp:
 
         # Initialize score label outside of challenge start to avoid overwriting
         self.score_label = tk.Label(self.root, text="Questions: 0 | Correct: 0 | Percentage: 0%")
-        self.score_label.grid(row=6, column=0, columnspan=5, pady=10)
+        self.score_label.grid(row=7, column=0, columnspan=5, pady=10)
 
         # Hide all buttons initially
         self.hide_buttons()
@@ -233,11 +230,13 @@ class GuessrApp:
         if self.num_answers == 2:
             self.button1.grid(row=3, column=1, padx=60, pady=5, sticky='we')
             self.button2.grid(row=3, column=2, padx=60, pady=5, sticky='we')
+            self.buttonnext.grid(row=4, column = 0, columnspan = 2, pady = 10)
         elif self.num_answers == 4:
             self.button1.grid(row=3, column=0, padx=60, pady=5, sticky='we')
             self.button2.grid(row=3, column=1, padx=60, pady=5, sticky='we')
             self.button3.grid(row=4, column=0, padx=60, pady=5, sticky='we')
             self.button4.grid(row=4, column=1, padx=60, pady=5, sticky='we')
+            self.buttonnext.grid(row=5, column = 0, columnspan = 2, pady = 10)
         elif self.num_answers == 6:
             self.button1.grid(row=3, column=0, padx=60, pady=5, sticky='we')
             self.button2.grid(row=3, column=1, padx=60, pady=5, sticky='we')
@@ -245,6 +244,9 @@ class GuessrApp:
             self.button4.grid(row=4, column=1, padx=60, pady=5, sticky='we')
             self.button5.grid(row=5, column=0, padx=60, pady=5, sticky='we')
             self.button6.grid(row=5, column=1, padx=60, pady=5, sticky='we')
+            self.buttonnext.grid(row=6, column = 0, columnspan = 2, pady = 10)
+
+
 
     def load_countries(self, event):
         num_question = int(self.num_questions_var.get())
@@ -257,6 +259,7 @@ class GuessrApp:
         self.button4.grid_forget()
         self.button5.grid_forget()
         self.button6.grid_forget()
+        self.buttonnext.grid_forget()
 
     def check_answer(self, selected_option):
         # First, reset all button colors to the default color
@@ -288,14 +291,22 @@ class GuessrApp:
         # Update the score board
         self.update_score_board()
 
-        # Wait for 1 second and then ask the next question
-        self.root.after(2000, self.reset_button_colors)
+        self.button1["state"] = "disabled"
+        self.button2["state"] = "disabled"
+        self.button3["state"] = "disabled"
+        self.button4["state"] = "disabled"
+        self.button5["state"] = "disabled"
+        self.button6["state"] = "disabled"
 
-        # next question
-        count = self.num_questions_var.get()
-        self.root.after(2000, self.ask_questions, int(count))
+        # Wait for 1 second and then ask the next question
+        self.root.after(1000, self.nextnormal)
+
+    def nextnormal(self):
+        self.buttonnext["state"] = "normal"
 
     def ask_questions(self, num_questions):
+        self.buttonnext["state"] = "disabled"
+
         if self.current_question >= num_questions or self.current_question >= len(self.flags):
             self.show_final_score()
             return
@@ -335,6 +346,16 @@ class GuessrApp:
         self.button4.config(text=option_list[3] if len(option_list) > 3 else "")
         self.button5.config(text=option_list[4] if len(option_list) > 4 else "")
         self.button6.config(text=option_list[5] if len(option_list) > 5 else "")
+
+        self.button1["state"] = "normal"
+        self.button2["state"] = "normal"
+        self.button3["state"] = "normal"
+        self.button4["state"] = "normal"
+        self.button5["state"] = "normal"
+        self.button6["state"] = "normal"
+
+        self.reset_button_colors()
+
 
     def reset_quiz(self):
         self.flag_label.config(image='')
