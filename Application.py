@@ -86,7 +86,7 @@ class GuessrApp:
 
         region_data = copy.deepcopy(self.data[selected_region])
         max_entries = len(region_data)
-        print(max_entries)
+
         self.update_option_menu(max_entries)
 
     def update_option_menu(self, max_value):
