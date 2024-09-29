@@ -86,6 +86,7 @@ class GuessrApp:
 
         region_data = copy.deepcopy(self.data[selected_region])
         max_entries = len(region_data)
+        print(max_entries)
         self.update_option_menu(max_entries)
 
     def update_option_menu(self, max_value):
@@ -104,27 +105,11 @@ class GuessrApp:
         self.num_questions_var.set(series[0])
 
     def generate_series(self, max_value):
-        # Handle cases where max_value is less than 10
-        if max_value < 10:
-            return [str(max_value)]
-
-        # Handle cases where max_value is between 10 and 20 (exclusive)
-        if max_value < 20:
-            return [str(10), str(max_value)]
-
         # Base series for values greater than or equal to 20
         base_series = [10, 20, 30, 50, 100]
 
-        if max_value <= base_series[-1]:
-            # Create a series with values up to max_value
-            series = [x for x in base_series if x <= max_value]
-        else:
-            # Extend the base series to include max_value
-            series = base_series + [max_value]
-
-        # Ensure the series contains no more than four elements
-        while len(series) > 5:
-            series.pop(0)
+        series = [x for x in base_series if x < max_value]
+        series += [max_value]
 
         return [str(num) for num in series]
 
@@ -210,31 +195,29 @@ class GuessrApp:
         self.ask_questions(selected_mode)
 
     def compare_text_string(self):
-        user_input = self.buttontext.get()
-        correct_answer_string = self.correct_string
+        user_input = self.buttontext.get().strip()
         self.reset_button_colors()
 
         if user_input.lower() == '':
             messagebox.showerror("Error", "You must first enter the name of a country")
             return
+        elif user_input.lower() in [temp.lower() for temp in self.correct_string]:
+            self.score += 1
+            self.correcttext["state"] = "normal"
+            self.buttontext.config(bg='green')
+            self.correcttext.delete('1.0', tk.END)
+            self.correcttext.insert(tk.END, self.correct_string[0])
+            self.correcttext["state"] = "disabled"
+            self.buttontextcheck["state"] = "disabled"
+            self.correcttext.config(bg='green')
         else:
-            if user_input.lower() == correct_answer_string.lower():
-                self.score += 1
-                self.correcttext["state"] = "normal"
-                self.buttontext.config(bg='green')
-                self.correcttext.delete('1.0', tk.END)
-                self.correcttext.insert(tk.END, correct_answer_string)
-                self.correcttext["state"] = "disabled"
-                self.buttontextcheck["state"] = "disabled"
-                self.correcttext.config(bg='green')
-            else:
-                self.buttontext.config(bg='red')
-                self.correcttext["state"] = "normal"
-                self.correcttext.delete('1.0', tk.END)
-                self.correcttext.insert(tk.END, correct_answer_string)
-                self.correcttext.config(bg='green')
-                self.correcttext["state"] = "disabled"
-                self.buttontextcheck["state"] = "disabled"
+            self.buttontext.config(bg='red')
+            self.correcttext["state"] = "normal"
+            self.correcttext.delete('1.0', tk.END)
+            self.correcttext.insert(tk.END, self.correct_string[0])
+            self.correcttext.config(bg='green')
+            self.correcttext["state"] = "disabled"
+            self.buttontextcheck["state"] = "disabled"
 
         if self.current_question >= int(self.num_questions_var.get()) or self.current_question >= len(self.flags):
             self.show_final_score()
@@ -258,7 +241,12 @@ class GuessrApp:
                 index = random.randint(0, count - 1)
 
                 item = region_data[index]
-                self.countries_dict[item['country_code']] = item['country_name']
+                self.countries_dict[item['country_code']] = [item['country_name']]
+                if 'alternative' in region_data[index].keys():
+                    if type(item['alternative']) is str:
+                        self.countries_dict[item['country_code']].append(item['alternative'])
+                    else:
+                        self.countries_dict[item['country_code']] += item['alternative']
 
                 region_data.pop(index)
 
@@ -396,11 +384,10 @@ class GuessrApp:
         ## display question number on screen
         self.current_question += 1
         flag_code, flag_path = self.flags[self.current_question - 1]
-        string_code, flag_path = self.flags[self.current_question - 1]
-        correct_country = self.countries_dict[flag_code]
-        self.correct_string = correct_country
+        correct_country = self.countries_dict[flag_code][0]
+        self.correct_string = self.countries_dict[flag_code]
 
-        country_list = list(self.countries_dict.values())
+        country_list = [element[0] for element in self.countries_dict.values()]
         country_list.remove(correct_country)
         option_list.append(correct_country)
 

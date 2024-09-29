@@ -594,7 +594,8 @@
     },
     {
       "country_code": "GB",
-      "country_name": "United Kingdom"
+      "country_name": "United Kingdom",
+      "alternative": "UK"
     },
     {
       "country_code": "VA",
@@ -612,7 +613,8 @@
     },
     {
         "country_code": "US",
-        "country_name": "United States"
+        "country_name": "United States",
+	"alternative": ["USA", "United States of America", "US"]
     },
     {
         "country_code": "GT",
@@ -1012,7 +1014,8 @@
     },
     {
         "country_code": "US",
-        "country_name": "United States"
+        "country_name": "United States",
+	"alternative": ["USA", "United States of America", "US"]
     },
     {
         "country_code": "GT",
@@ -1224,7 +1227,8 @@
     },
     {
       "country_code": "GB",
-      "country_name": "United Kingdom"
+      "country_name": "United Kingdom",
+      "alternative": "UK"
     },
     {
       "country_code": "VA",
