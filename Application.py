@@ -449,14 +449,14 @@ class GuessrApp:
     def update_score_board(self):
         num_questions_value = int(self.num_questions_var.get())
 
-        percentage = (self.score / (self.current_question + 1)) * 100  # Assuming 10 questions
+        percentage = (self.score / (self.current_question)) * 100  # Assuming 10 questions
         self.score_label.config(
             text=f"Questions: {num_questions_value} | Current Question: {self.current_question + 1} "
                  f"| Correct: {self.score} | Percentage: {percentage:.2f}%")
 
     def show_final_score(self):
         num_questions_value = int(self.num_questions_var.get())
-        percentage = (self.score / (self.current_question + 1)) * 100
+        percentage = (self.score / (self.current_question)) * 100
         messagebox.showinfo("Quiz Completed",
                             f"Final Score: {self.score}/{num_questions_value}\nPercentage: {percentage:.2f}%")
         self.score_label.config(
