@@ -220,16 +220,20 @@ class GuessrApp:
         else:
             if user_input.lower() == correct_answer_string.lower():
                 self.score += 1
+                self.correcttext["state"] = "normal"
                 self.buttontext.config(bg='green')
                 self.correcttext.delete('1.0', tk.END)
                 self.correcttext.insert(tk.END, correct_answer_string)
+                self.correcttext["state"] = "disabled"
                 self.buttontextcheck["state"] = "disabled"
                 self.correcttext.config(bg='green')
             else:
                 self.buttontext.config(bg='red')
+                self.correcttext["state"] = "normal"
                 self.correcttext.delete('1.0', tk.END)
                 self.correcttext.insert(tk.END, correct_answer_string)
                 self.correcttext.config(bg='green')
+                self.correcttext["state"] = "disabled"
                 self.buttontextcheck["state"] = "disabled"
 
         if self.current_question >= int(self.num_questions_var.get()) or self.current_question >= len(self.flags):
@@ -437,8 +441,10 @@ class GuessrApp:
             self.reset_button_colors()
             self.buttontextcheck["state"] = "normal"
             self.buttontext.delete(0, 'end')
+            self.correcttext["state"] = "normal"
             self.correcttext.delete('1.0', tk.END)
             self.correcttext.insert(tk.END, "Correct Answer")
+            self.correcttext["state"] = "disabled"
 
     def update_score_board(self):
         num_questions_value = int(self.num_questions_var.get())
