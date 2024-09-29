@@ -223,7 +223,7 @@ class GuessrApp:
             self.show_final_score()
             return
         else:
-            self.root.after(1000, self.nextnormal)
+            self.root.after(500, self.nextnormal)
 
     def get_countries_by_region(self, region_name, needed):
 
@@ -371,7 +371,7 @@ class GuessrApp:
             self.show_final_score()
             return
         else:
-            self.root.after(1000, self.nextnormal)
+            self.root.after(500, self.nextnormal)
 
     def nextnormal(self):
         self.buttonnext["state"] = "normal"
