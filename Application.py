@@ -81,7 +81,7 @@ class GuessrApp:
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
-    def load_num_of_questions(self):
+    def load_num_of_questions(self, event):
         selected_region = self.region.get()
 
         region_data = copy.deepcopy(self.data[selected_region])
@@ -323,7 +323,7 @@ class GuessrApp:
             self.button6.grid(row=5, column=1, padx=60, pady=5, sticky='we')
             self.buttonnext.grid(row=6, column=0, columnspan=2, pady=10)
 
-    def load_countries(self):
+    def load_countries(self, event):
         selected_region = self.region.get()
         num_question = int(self.num_questions_var.get())
         self.get_countries_by_region(selected_region, num_question)
