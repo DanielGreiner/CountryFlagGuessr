@@ -29,6 +29,10 @@ class GuessrApp:
         self.root.configure(bg='lavender')
         self.root.resizable(False, False)
 
+        # Set the initial theme
+        #root.tk.call("source", "azure.tcl")
+        #root.tk.call("set_theme", "light")
+
         self.data = data
         self.score = 0
         self.total_questions = 0
